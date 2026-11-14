@@ -9,7 +9,7 @@
         body { margin: 0; padding: 20px; background-color: #1a1a1a; color: #ffffff; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
         .game-container { display: flex; gap: 30px; max-width: 1250px; width: 100%; background: #262626; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #333; }
         
-        /* Left Side: Massive Gameplay Grid */
+        /* Left Side: Gameplay Grid */
         .left-panel { flex: 1.4; display: flex; flex-direction: column; align-items: center; background: #1f1f1f; padding: 20px; border-radius: 10px; border: 1px solid #2e2e2e; }
         h1 { margin: 0 0 20px 0; font-size: 28px; color: #4caf50; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; }
         
@@ -73,7 +73,6 @@
 <body>
 
 <div class="game-container">
-    <!-- Left Column: Big Tabletop Grid Board -->
     <div class="left-panel">
         <h1>Square-Buster</h1>
         <div class="grid-wrapper">
@@ -82,13 +81,12 @@
             <div class="grid-container" id="board"></div>
             
             <div class="victory-screen" id="victory-layer" style="display: none;">
-                <div id="victory-text">PLAYER 1 SECURED VICTORY!</div>
+                <div id="victory-text">VICTORY SECURED!</div>
                 <button onclick="resetGame()" style="margin-top:20px; padding:12px 24px; font-size:16px; font-weight:bold; cursor:pointer; background:#4caf50; color:white; border:none; border-radius:6px;">Start New Match</button>
             </div>
         </div>
     </div>
 
-    <!-- Right Column: Command HUD Sidebar -->
     <div class="right-panel">
         <div id="p1-card" class="player-status-card" style="border-left-color: #2196f3;">
             <div class="status-header"><span>Player 1</span><span id="p1-status-tag" class="status-tag" style="display:none;">ELIMINATED</span></div>
@@ -110,3 +108,4 @@
         <div class="actions-panel">
             <div class="panel-title">Operations Menu</div>
             <button class="action-btn" id="btn-move" onclick="selectAction('move')"><span>🏃 Move Character</span><small>1 AP / step</small></button>
+            <button class="action-btn" id="btn-attack" onclick="selectAction('attack')"><span>⚔️ Attack (Player/Wall)</span><small>1 AP</small></button>
