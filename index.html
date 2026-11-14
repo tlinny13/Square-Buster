@@ -7,46 +7,27 @@
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
         body { margin: 0; padding: 20px; background-color: #161920; color: #ffffff; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
-        
         .game-container { display: flex; gap: 30px; max-width: 1300px; width: 100%; background: #1e222b; padding: 25px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); border: 1px solid #2a2f3a; }
-        
-        /* Left Column: Big Gameplay Board */
         .left-panel { flex: 1.5; display: flex; flex-direction: column; align-items: center; background: #1a1d24; padding: 20px; border-radius: 10px; border: 1px solid #252932; }
         h1 { margin: 0 0 20px 0; font-size: 24px; color: #4caf50; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
-        
         .grid-wrapper { position: relative; padding: 40px; background: #11141a; border-radius: 8px; border: 1px solid #2a2f3a; }
         .grid-container { display: grid; grid-template-columns: repeat(15, 45px); grid-template-rows: repeat(15, 45px); gap: 1px; background: #222731; border: 1px solid #222731; width: 689px; height: 689px; }
-        
         .cell { background: #161920; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; position: relative; cursor: pointer; user-select: none; transition: background 0.15s; width: 45px; height: 45px; }
         .cell:hover { background: #1c212b; z-index: 2; }
-        
-        /* Edge Axis Labels */
         .label-row { position: absolute; display: flex; left: 40px; height: 40px; align-items: center; top: 0; width: 689px; justify-content: space-around; }
         .label-col { position: absolute; display: flex; flex-direction: column; top: 40px; width: 40px; align-items: center; left: 0; height: 689px; justify-content: space-around; }
         .axis-label { font-size: 12px; font-weight: bold; color: #525a6c; text-align: center; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
-
-        /* Landmark Aesthetics */
         .cell.node-minor { border: 1px solid #ffb300; background: #24211a; }
         .cell.node-major { border: 1px solid #ffb300; background: #2d2417; }
-        .node-content { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; color: #ffb300; gap: 2px; }
-        .node-content span { font-size: 11px; }
-
-        /* Diamond Range Overlay Indicators */
         .cell.movement-range { background: rgba(33, 150, 243, 0.18) !important; border: 2px solid #2196f3 !important; }
         .cell.interaction-range { background: rgba(76, 175, 80, 0.18) !important; border: 2px dashed #4caf50 !important; }
-        
-        /* Player Tokens */
         .player-token { width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.4); z-index: 3; }
         .p1-color { background-color: #2196f3 !important; }
         .p2-color { background-color: #ffb300 !important; }
         .p3-color { background-color: #f44336 !important; }
         .p4-color { background-color: #4caf50 !important; }
-        
-        /* Structures Assets */
         .structure { font-size: 18px; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; z-index: 2; }
         .wall-struct { background: #3a3f4d; color: #a0aabf; border: 1px solid #525a6c; border-radius: 4px; }
-        
-        /* Right Sidebar Panel HUD */
         .right-panel { flex: 0.8; display: flex; flex-direction: column; gap: 15px; background: #1a1d24; padding: 20px; border-radius: 10px; border: 1px solid #252932; align-self: stretch; }
         .player-status-card { background: #222731; padding: 12px; border-radius: 8px; border-left: 5px solid #fff; display: flex; flex-direction: column; gap: 4px; border: 1px solid #2e3542; }
         .player-status-card.active { border-color: #525a6c; background: #29303d; box-shadow: 0 0 12px rgba(255,255,255,0.05); }
@@ -54,16 +35,13 @@
         .status-tag { font-size: 10px; background: #d32f2f; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
         .status-stats { display: flex; gap: 15px; font-size: 13px; color: #a0aabf; }
         .status-stats b { color: #fff; }
-        
-        .operations-box { background: #11141a; padding: 15px; border-radius: 8px; border: 1px solid #222731; display: flex; flex-direction: column; gap: 10px; flexgrow: 1; }
+        .operations-box { background: #11141a; padding: 15px; border-radius: 8px; border: 1px solid #222731; display: flex; flex-direction: column; gap: 10px; }
         .panel-heading { font-size: 11px; font-weight: bold; color: #626e82; text-transform: uppercase; letter-spacing: 1px; }
         .action-button { background: #222731; color: #fff; border: 1px solid #2e3542; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center; font-size: 13px; transition: all 0.15s; width: 100%; text-align: left; }
         .action-button:hover:not(:disabled) { background: #2c3340; border-color: #3e485c; }
         .action-button.active-choice { background: #4caf50 !important; border-color: #66bb6a !important; }
-        
         .turn-skip-btn { background: #c62828; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; width: 100%; transition: background 0.2s; margin-top: auto; }
         .turn-skip-btn:hover { background: #e53935; }
-        
         .console-box { background: #0b0d11; border-radius: 6px; padding: 10px; font-size: 12px; color: #7fe084; height: 110px; overflow-y: auto; border: 1px solid #161920; font-family: monospace; line-height: 1.4; }
         .victory-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11,13,17,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; z-index: 10; font-size: 28px; font-weight: bold; color: #4caf50; text-align: center; padding: 20px; }
         .victory-title { font-size: 48px; color: #ffb300; letter-spacing: 3px; margin-bottom: 5px; text-shadow: 0 0 15px rgba(255,179,0,0.4); }
@@ -78,7 +56,6 @@
             <div class="label-row" id="top-labels"></div>
             <div class="label-col" id="left-labels"></div>
             <div class="grid-container" id="board"></div>
-            
             <div class="victory-screen" id="victory-layer" style="display: none;">
                 <div class="victory-title">CHAMPION</div>
                 <div id="victory-text">MATCH CONCLUDED</div>
@@ -113,3 +90,19 @@
             <button class="action-button" id="btn-turret" onclick="setIntent('turret')"><span>🎯 Place Turret</span><small>3 AP</small></button>
             <button class="action-button" id="btn-generator" onclick="setIntent('generator')"><span>⚡ Place Gen</span><small>5 AP</small></button>
             <div class="console-box" id="log"></div>
+            <button class="turn-skip-btn" onclick="manualPassTurn()">Pass Turn</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const COLS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'];
+let players = [];
+let structures = [];
+let initialLoadDone = false; 
+
+let generators = [
+    { r: 3, c: 3, value: 1, txt: '+1 AP', type: 'minor', ownerId: null },   
+    { r: 11, c: 3, value: 1, txt: '+1 AP', type: 'minor', ownerId: null },  
+    { r: 3, c: 11, value: 1, txt: '+1 AP', type: 'minor', ownerId: null },  
+    { r: 11, c: 11, value: 1, txt: '+1 AP', type: 'minor', ownerId: null }, 
