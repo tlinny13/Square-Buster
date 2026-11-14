@@ -3,7 +3,466 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Square-Buster: Tactical 15x15 Arena</title>
+    <title>Square-Buster: Tactical 15x15CHAMPION
+MATCH CONCLUDED
+Return to Config
+
+
+Player 1ELIMINATED
+HP: 3/10AP: 1Range: 1
+
+
+Player 2ELIMINATED
+HP: 3/10AP: 1Range: 1
+
+
+Player 3ELIMINATED
+HP: 3/10AP: 1Range: 1
+
+
+Player 4ELIMINATED
+HP: 3/10AP: 1Range: 1
+Operations Dashboard
+🏃 Move Piece1 AP / cell
+💠 Expand Matrix1 AP / Turn
+🧱 Build Wall1 AP
+🎯 Place Turret3 AP
+⚡ Place Gen5 AP
+❤️ Place HP Gen10 AP
+🎁 Gift APCosts 1, Gives 2 AP
+
+Pass Control (Skip)
+
+
+const COLS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'];
+const AVAILABLE_COLORS = [
+{ value: '#2196f3', name: 'Neon Sapphire' },
+{ value: '#ffb300', name: 'Cyber Gold' },
+{ value: '#f44336', name: 'Crimson Fury' },
+{ value: '#4caf50', name: 'Emerald Matrix' },
+{ value: '#9c27b0', name: 'Plasma Purple' },
+{ value: '#00bcd4', name: 'Arctic Cyan' }
+];
+const SPAWN_COORDINATES = [
+{ r: 1, c: 1 },   // P1 -> B2
+{ r: 1, c: 13 },  // P2 -> N2
+{ r: 13, c: 13 }, // P3 -> N14
+{ r: 13, c: 1 },  // P4 -> B14
+];
+let selectedPlayerCount = 4;
+let configuredPlayers = [];
+let players = [];
+let structures = [];
+let generators = [
+{ r: 3, c: 3, value: 1, txt: '+1 AP', type: 'minor', ownerId: null },
+{ r: 11, c: 3, value: 1, txt: '+1 AP', type: 'minor', ownerId: null },
+{ r: 3, c: 11, value: 1, txt: '+1 AP', type: 'minor', ownerId: null },
+{ r: 11, c: 11, value: 1, txt: '+1 AP', type: 'minor', ownerId: null },
+{ r: 7, c: 7, value: 3, txt: '+3 AP', type: 'major', ownerId: null }    // H8
+];
+let activeIdx = 0;
+let currentIntent = 'move';
+// Setup Labels once
+const topRow = document.getElementById('top-labels');
+const leftCol = document.getElementById('left-labels');
+COLS.forEach(val => topRow.innerHTML += <div class="axis-label">${val}</div>);
+for(let r=1; r<=15; r++) leftCol.innerHTML += <div class="axis-label">${r}</div>;
+function manhattan(r1, c1, r2, c2) { return Math.abs(r1 - r2) + Math.abs(c1 - c2); }
+function chebyshev(r1, c1, r2, c2) { return Math.max(Math.abs(r1 - r2), Math.abs(c1 - c2)); }
+function getPlayerAt(r, c) { return players.find(p => p.lives > 0 && p.r === r && p.c === c); }
+function getStructureAt(r, c) { return structures.find(s => s.r === r && s.c === c); }
+function getGeneratorAt(r, c) { return generators.find(g => g.r === r && g.c === c); }
+function renderSetupForm() {
+const container = document.getElementById('player-config-container');
+container.innerHTML = '';
+configuredPlayers = [];
+for (let i = 0; i < selectedPlayerCount; i++) {
+let colorDefault = AVAILABLE_COLORS[i % AVAILABLE_COLORS.length].value;
+configuredPlayers.push({ id: i + 1, name: Player ${i + 1}, color: colorDefault });
+}
+configuredPlayers.forEach((cp, idx) => {
+const card = document.createElement('div');
+card.className = 'player-setup-card';
+card.style.borderLeft = 5px solid ${cp.color};
+const nameInput = document.createElement('input');
+nameInput.type = 'text';
+nameInput.value = cp.name;
+nameInput.oninput = (e) => { cp.name = e.target.value || Player ${cp.id}; };
+const pickerGrid = document.createElement('div');
+pickerGrid.className = 'color-picker-grid';
+AVAILABLE_COLORS.forEach(colorObj => {
+const swatch = document.createElement('div');
+swatch.className = 'color-swatch';
+swatch.style.backgroundColor = colorObj.value;
+if (cp.color === colorObj.value) swatch.className += ' selected';
+swatch.onclick = () => {
+let colorTaken = configuredPlayers.some(p => p.id !== cp.id && p.color === colorObj.value);
+if (colorTaken) { alert("This tactical color scheme is already locked by another faction."); return; }
+cp.color = colorObj.value;
+card.style.borderLeft = 5px solid ${cp.color};
+renderSetupFormSwatches();
+};
+pickerGrid.appendChild(swatch);
+});
+card.appendChild(nameInput);
+card.appendChild(pickerGrid);
+container.appendChild(card);
+});
+}
+function renderSetupFormSwatches() {
+const cards = document.querySelectorAll('.player-setup-card');
+cards.forEach((card, pIdx) => {
+const swatches = card.querySelectorAll('.color-swatch');
+let currentConfig = configuredPlayers[pIdx];
+swatches.forEach(swatch => {
+let hex = swatch.style.backgroundColor;
+let rgbToHex = (rgb) => '#' + rgb.match(/\d+/g).map(x => (+x).toString(16).padStart(2, '0')).join('');
+if (hex.startsWith('rgb')) hex = rgbToHex(hex);
+swatch.className = 'color-swatch';
+if (currentConfig.color === hex) swatch.className += ' selected';
+if (configuredPlayers.some(p => p.id !== currentConfig.id && p.color === hex)) swatch.className += ' disabled';
+});
+});
+}
+function setTotalPlayers(count) {
+selectedPlayerCount = count;
+document.querySelectorAll('.count-btn').forEach((btn, i) => {
+btn.className = (i + 2 === count) ? 'count-btn selected' : 'count-btn';
+});
+renderSetupForm();
+}
+function launchArenaMatch() {
+document.getElementById('setup-view').style.display = 'none';
+document.getElementById('game-view').style.display = 'flex';
+players = configuredPlayers.map((cp, idx) => {
+return {
+id: cp.id,
+name: cp.name,
+r: SPAWN_COORDINATES[idx].r,
+c: SPAWN_COORDINATES[idx].c,
+lives: 3,
+ap: idx === 0 ? 1 : 0, // Uniform 1 AP on Turn 1 start
+range: 1,
+color: cp.color
+};
+}).sort((a, b) => a.id - b.id); // Strict numerical sorting
+for(let i = 1; i <= 4; i++) {
+let card = document.getElementById(p${i}-card);
+if (i <= players.length) {
+card.style.display = 'flex';
+card.style.borderLeftColor = players[i-1].color;
+document.getElementById(p${i}-card-name).innerText = players[i-1].name;
+} else {
+card.style.display = 'none';
+}
+}
+structures = [];
+generators.forEach(g => g.ownerId = null);
+activeIdx = 0;
+currentIntent = 'move';
+document.getElementById('victory-layer').style.display = 'none';
+const logBox = document.getElementById('log-box');
+logBox.innerHTML = '';
+pushLog("Arena Initialized. Move selection defaulted.");
+buildGameBoardCells();
+refreshDisplay();
+}
+function buildGameBoardCells() {
+const board = document.getElementById('board');
+board.innerHTML = '';
+for(let r = 0; r < 15; r++) {
+for(let c = 0; c < 15; c++) {
+const cell = document.createElement('div');
+cell.className = 'cell';
+cell.dataset.r = r;
+cell.dataset.c = c;
+cell.onclick = () => onCellInteraction(r, c);
+board.appendChild(cell);
+}
+}
+}
+function setIntent(intent) {
+let p = players[activeIdx];
+if (p.lives <= 0 || p.ap <= 0) return;
+if (intent === 'widen') {
+if(p.range >= 3) { pushLog("Matrix expansion maximizes out at a 3 square diamond."); return; }
+p.range++;
+p.ap--;
+pushLog(${p.name} expanded diamond footprint to ${p.range}.);
+currentIntent = 'move';
+if (p.ap <= 0) passTurn();
+refreshDisplay();
+return;
+}
+currentIntent = (currentIntent === intent) ? 'move' : intent;
+refreshDisplay();
+}
+function onCellInteraction(r, c) {
+let p = players[activeIdx];
+if (p.lives <= 0 || p.ap <= 0) return;
+let distManhattan = manhattan(p.r, p.c, r, c);
+let distChebyshev = chebyshev(p.r, p.c, r, c);
+let targetPlayer = getPlayerAt(r, c);
+let targetStructure = getStructureAt(r, c);
+// 💥 PLAYER AUTO-ATTACK (Fires if target is 1 Chebyshev tile away)
+if (targetPlayer && targetPlayer.id !== p.id) {
+if (distChebyshev === 1) {
+targetPlayer.lives--;
+p.ap--;
+pushLog(Auto-Strike! ${p.name} dealt 1 damage to ${targetPlayer.name}.);
+// CRITICAL STEP: Evaluate elimination immediately before modifying attacker turn contexts
+let isDead = processElimination(targetPlayer);
+// If the active player killed themselves due to recoil/counters or match ended, halt
+if (players[activeIdx].lives <= 0) return;
+if (p.ap <= 0) {
+passTurn();
+} else {
+refreshDisplay();
+}
+} else { pushLog("Target player out of melee perimeter range."); }
+return;
+}
+// 💥 STRUCTURE AUTO-ATTACK
+if (targetStructure && targetStructure.ownerId !== p.id) {
+if (distChebyshev === 1) {
+targetStructure.hp--;
+p.ap--;
+pushLog(Auto-Strike! Dealt 1 damage to enemy ${targetStructure.type}.);
+if (targetStructure.hp <= 0) {
+structures = structures.filter(s => s !== targetStructure);
+pushLog(The enemy ${targetStructure.type} was completely demolished!);
+}
+if (p.ap <= 0) passTurn();
+else refreshDisplay();
+} else { pushLog("Target asset out of range."); }
+return;
+}
+// 🎁 PROXIMITY GIFTING
+if (currentIntent === 'gift') {
+if (!targetPlayer) { pushLog("Pick an active player piece to gift AP."); return; }
+if (distManhattan > p.range) { pushLog(Target lies outside your active Diamond Interference Matrix.); return; }
+targetPlayer.ap += 2;
+p.ap -= 1;
+pushLog(${p.name} executed efficient transfer: Gifted +2 AP to ${targetPlayer.name} at a cost of only 1 AP.);
+currentIntent = 'move';
+if (p.ap <= 0) passTurn();
+refreshDisplay();
+return;
+}
+// 🏃 MOVEMENT MECHANICS
+if (currentIntent === 'move') {
+if (distManhattan === 1) {
+if (targetStructure && targetStructure.type === 'wall') { pushLog("Movement route blocked by impassable Wall asset."); return; }
+p.r = r; p.c = c; p.ap--;
+let gen = getGeneratorAt(r, c);
+if (gen) {
+gen.ownerId = p.id;
+pushLog(${p.name} captured Node registry ${COLS[c]}${r+1}.);
+}
+if (p.ap <= 0) passTurn();
+}
+refreshDisplay();
+return;
+}
+// 🏗️ BUILDING STRUCTURES
+if (['wall', 'turret', 'generator', 'healthgen'].includes(currentIntent)) {
+if (distManhattan > p.range) { pushLog("Target terminal sits outside your Diamond Interference footprint."); return; }
+if (targetStructure || getGeneratorAt(r, c) || getPlayerAt(r, c)) { pushLog("Target cell is occupied or contains structural assets."); return; }
+if (currentIntent === 'wall') {
+structures.push({ r, c, type: 'wall', hp: 1, ownerId: p.id });
+p.ap--;
+pushLog(${p.name} built a Wall barrier at ${COLS[c]}${r+1}.);
+}
+else if (currentIntent === 'turret') {
+if (p.ap < 3) { pushLog("Turrets require 3 AP allocation."); return; }
+structures.push({ r, c, type: 'turret', hp: 1, ownerId: p.id });
+p.ap -= 3;
+pushLog(${p.name} placed a Defense Turret at ${COLS[c]}${r+1}.);
+}
+else if (currentIntent === 'generator') {
+if (p.ap < 5) { pushLog("Generators require 5 AP allocation."); return; }
+structures.push({ r, c, type: 'generator', hp: 1, ownerId: p.id });
+p.ap -= 5;
+pushLog(${p.name} deployed a Resource Generator at ${COLS[c]}${r+1}.);
+}
+else if (currentIntent === 'healthgen') {
+if (p.ap < 10) { pushLog("Health Generators require 10 AP allocation."); return; }
+structures.push({ r, c, type: 'healthgen', hp: 1, ownerId: p.id });
+p.ap -= 10;
+pushLog(${p.name} engineered a Health Generator at ${COLS[c]}${r+1}.);
+}
+currentIntent = 'move';
+if (p.ap <= 0) passTurn();
+refreshDisplay();
+}
+}
+function processElimination(player) {
+if (player.lives <= 0) {
+pushLog(💥 EXTINCTION EVENT: ${player.name} has been completely eliminated!);
+// Scrub all structures owned by the deceased
+structures = structures.filter(s => s.ownerId !== player.id);
+// Revert global nodes to unowned neutral status
+generators.forEach(g => { if(g.ownerId === player.id) g.ownerId = null; });
+player.r = -9;
+player.c = -9;
+player.ap = 0;
+let matchFinished = evaluateMatchEnd();
+// If the current active player died or the match ended, handle state decoupling safely
+if (!matchFinished && players[activeIdx].id === player.id) {
+passTurn();
+}
+return true;
+}
+return false;
+}
+function manualPassTurn() {
+let p = players[activeIdx];
+// Rule constraint validation: if a user finishes actions with 0 AP, they are safely removed from the grid
+if (p.ap <= 0) {
+pushLog(⚠️ Resource Exhaustion: ${p.name} concludes operations with 0 AP.);
+p.lives = 0; // Set lives to 0 to trigger complete asset removal sequence cleanly
+processElimination(p);
+}
+passTurn();
+}
+function passTurn() {
+currentIntent = 'move';
+let safeguard = 0;
+let survivorsCount = players.filter(p => p.lives > 0).length;
+if (survivorsCount <= 1) { evaluateMatchEnd(); refreshDisplay(); return; }
+// Increment index sequentially (1 -> 2 -> 3 -> 4) skipping dead entities cleanly
+do {
+activeIdx = (activeIdx + 1) % players.length;
+safeguard++;
+if (safeguard > 12) break;
+} while (players[activeIdx].lives <= 0);
+let nextPlayer = players[activeIdx];
+if (nextPlayer.lives <= 0) { evaluateMatchEnd(); return; }
+// Resolve Health Generators
+structures.forEach(s => {
+if (s.type === 'healthgen' && s.ownerId === nextPlayer.id) {
+if (nextPlayer.lives < 10) {
+nextPlayer.lives = Math.min(10, nextPlayer.lives + 1);
+pushLog(❤️ Vitality Restored: HP Gen granted +1 HP to ${nextPlayer.name}.);
+}
+}
+});
+let income = 1;
+generators.forEach(g => { if (g.ownerId === nextPlayer.id) income += g.value; });
+structures.forEach(s => { if (s.type === 'generator' && s.ownerId === nextPlayer.id) income += 1; });
+nextPlayer.ap += income;
+pushLog(--- ${nextPlayer.name}'s Round (+${income} AP Added | Banked: ${nextPlayer.ap} AP) ---);
+// Resolve Turret Startup Defense Attacks
+structures.forEach(s => {
+if (s.type === 'turret' && s.ownerId !== nextPlayer.id) {
+if (manhattan(s.r, s.c, nextPlayer.r, nextPlayer.c) <= 2) {
+nextPlayer.lives--;
+pushLog(💥 Warning! ${nextPlayer.name} caught by turret radar defenses! -1 HP.);
+processElimination(nextPlayer);
+}
+}
+});
+evaluateMatchEnd();
+refreshDisplay();
+}
+function evaluateMatchEnd() {
+let survivors = players.filter(p => p.lives > 0);
+if (survivors.length === 1) {
+document.getElementById('victory-text').innerText = ${survivors[0].name.toUpperCase()} SECURED ARENA DOMINANCE;
+document.getElementById('victory-layer').style.display = 'flex';
+return true;
+} else if (survivors.length === 0) {
+document.getElementById('victory-text').innerText = MUTUAL ANNIHILATION: NO SURVIVORS.;
+document.getElementById('victory-layer').style.display = 'flex';
+return true;
+}
+return false;
+}
+function returnToMenu() {
+document.getElementById('game-view').style.display = 'none';
+document.getElementById('setup-view').style.display = 'flex';
+renderSetupForm();
+}
+function pushLog(text) {
+const box = document.getElementById('log-box');
+box.innerHTML += <div>> ${text}</div>;
+box.scrollTop = box.scrollHeight;
+}
+function refreshDisplay() {
+let activePlayer = players[activeIdx];
+let isGameOver = players.filter(p => p.lives > 0).length <= 1;
+let actionButtons = document.querySelectorAll('.action-button, .turn-skip-btn');
+if (isGameOver || !activePlayer || activePlayer.lives <= 0) {
+actionButtons.forEach(btn => btn.disabled = true);
+} else {
+actionButtons.forEach(btn => btn.disabled = false);
+}
+players.forEach(p => {
+document.getElementById(p${p.id}-lives).innerText = Math.max(0, p.lives);
+document.getElementById(p${p.id}-ap).innerText = p.lives > 0 ? p.ap : 0;
+document.getElementById(p${p.id}-rng).innerText = p.range;
+let card = document.getElementById(p${p.id}-card);
+let tag = document.getElementById(p${p.id}-tag);
+if(p.lives <= 0) {
+tag.style.display = 'inline-block';
+card.className = 'player-status-card';
+} else {
+tag.style.display = 'none';
+if (!isGameOver && activePlayer && p.id === activePlayer.id) card.className = 'player-status-card active';
+else card.className = 'player-status-card';
+}
+});
+if (!isGameOver && activePlayer && activePlayer.lives > 0) {
+document.getElementById('btn-move').className = 'action-button' + (currentIntent === 'move' ? ' selected' : '');
+document.getElementById('btn-wall').className = 'action-button' + (currentIntent === 'wall' ? ' selected' : '');
+document.getElementById('btn-turret').className = 'action-button' + (currentIntent === 'turret' ? ' selected' : '');
+document.getElementById('btn-generator').className = 'action-button' + (currentIntent === 'generator' ? ' selected' : '');
+document.getElementById('btn-healthgen').className = 'action-button' + (currentIntent === 'healthgen' ? ' selected' : '');
+document.getElementById('btn-gift').className = 'action-button' + (currentIntent === 'gift' ? ' selected' : '');
+document.getElementById('btn-widen').disabled = activePlayer.range >= 3;
+}
+const cells = document.querySelectorAll('.cell');
+cells.forEach(cell => {
+let r = parseInt(cell.dataset.r);
+let c = parseInt(cell.dataset.c);
+cell.className = 'cell';
+cell.innerHTML = '';
+cell.style.backgroundColor = '';
+let gen = getGeneratorAt(r, c);
+if (gen) {
+cell.className += gen.type === 'minor' ? ' node-minor' : ' node-major';
+cell.innerHTML = <div class="node-content"><span>⭐</span><b>${gen.txt}</b></div>;
+if (gen.ownerId) {
+let owner = players.find(p => p.id === gen.ownerId);
+if (owner) cell.style.backgroundColor = owner.color + '22';
+}
+}
+if (!isGameOver && activePlayer && activePlayer.lives > 0 && currentIntent) {
+let dist = manhattan(activePlayer.r, activePlayer.c, r, c);
+if (currentIntent !== 'move' && dist <= activePlayer.range && dist > 0) cell.className += ' in-range';
+else if (currentIntent === 'move' && dist <= activePlayer.ap && dist > 0) cell.className += ' in-range';
+}
+let struct = getStructureAt(r, c);
+if (struct) {
+let sOwner = players.find(p => p.id === struct.ownerId);
+let sColor = sOwner ? sOwner.color : '#fff';
+if (struct.type === 'wall') {
+cell.innerHTML = <div class="structure wall-struct">🧱</div>;
+} else if (struct.type === 'turret') {
+cell.innerHTML = <div class="structure" style="color:${sColor}; font-size:22px;">🎯</div>;
+} else if (struct.type === 'generator') {
+cell.innerHTML = <div class="structure" style="color:${sColor}; font-size:22px;">⚡</div>;
+} else if (struct.type === 'healthgen') {
+cell.innerHTML = <div class="structure" style="color:${sColor}; font-size:22px;">❤️</div>;
+}
+}
+let targetPlayer = getPlayerAt(r, c);
+if (targetPlayer) {
+cell.innerHTML = <div class="player-token" style="background-color:${targetPlayer.color}">P${targetPlayer.id}</div>;
+}
+});
+}
+renderSetupForm(); Arena</title>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
         body { margin: 0; padding: 20px; background-color: #1a1a1a; color: #ffffff; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
