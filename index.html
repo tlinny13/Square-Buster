@@ -17,7 +17,6 @@
         .grid-wrapper { position: relative; padding: 40px; background: #11141a; border-radius: 8px; border: 1px solid #2a2f3a; }
         .grid-container { display: grid; grid-template-columns: repeat(15, 45px); grid-template-rows: repeat(15, 45px); gap: 1px; background: #222731; border: 1px solid #222731; width: 689px; height: 689px; }
         
-        /* FIXED: Hardcoded dimensions to guarantee grid cells render under all screen conditions */
         .cell { background: #161920; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; position: relative; cursor: pointer; user-select: none; transition: background 0.15s; width: 45px; height: 45px; border: 1px solid #252932; }
         .cell:hover { background: #1c212b; z-index: 2; }
         
@@ -112,3 +111,4 @@
             <button class="action-button" id="btn-widen" onclick="setIntent('widen')"><span>💠 Expand Matrix</span><small>1 AP</small></button>
             <button class="action-button" id="btn-wall" onclick="setIntent('wall')"><span>🧱 Build Wall</span><small>1 AP</small></button>
             <button class="action-button" id="btn-turret" onclick="setIntent('turret')"><span>🎯 Place Turret</span><small>3 AP</small></button>
+            <button class="action-button" id="btn-generator" onclick="setIntent('generator')"><span>⚡ Place Gen</span><small>5 AP</small></button>
