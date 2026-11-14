@@ -14,16 +14,18 @@
         .left-panel { flex: 1.5; display: flex; flex-direction: column; align-items: center; background: #1a1d24; padding: 20px; border-radius: 10px; border: 1px solid #252932; }
         h1 { margin: 0 0 20px 0; font-size: 24px; color: #4caf50; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
         
-        .grid-wrapper { position: relative; padding: 40px; background: #11141a; border-radius: 8px; border: 1px solid #2a2f3a; }
-        .grid-container { display: grid; grid-template-columns: repeat(15, 45px); grid-template-rows: repeat(15, 45px); gap: 1px; background: #222731; border: 1px solid #222731; width: 689px; height: 689px; }
+        .grid-wrapper { position: relative; padding: 50px; background: #11141a; border-radius: 8px; border: 1px solid #2a2f3a; width: 789px; height: 789px; display: flex; align-items: center; justify-content: center; }
         
-        .cell { background: #161920; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; position: relative; cursor: pointer; user-select: none; transition: background 0.15s; width: 45px; height: 45px; border: 1px solid #252932; }
+        /* FIXED: Re-engineered layout matrix to prevent the browser from shrinking the game map to zero pixels */
+        .grid-container { display: flex; flex-wrap: wrap; width: 677px; height: 677px; background: #222731; border: 1px solid #222731; padding: 1px; gap: 1px; }
+        
+        .cell { background: #161920; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; position: relative; cursor: pointer; user-select: none; transition: background 0.15s; width: 44px; height: 45px; }
         .cell:hover { background: #1c212b; z-index: 2; }
         
         /* Edge Axis Labels */
-        .label-row { position: absolute; display: flex; left: 40px; height: 40px; align-items: center; top: 0; width: 689px; justify-content: space-around; }
-        .label-col { position: absolute; display: flex; flex-direction: column; top: 40px; width: 40px; align-items: center; left: 0; height: 689px; justify-content: space-around; }
-        .axis-label { font-size: 12px; font-weight: bold; color: #525a6c; text-align: center; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
+        .label-row { position: absolute; display: flex; left: 55px; height: 40px; align-items: center; top: 5px; width: 677px; justify-content: space-around; }
+        .label-col { position: absolute; display: flex; flex-direction: column; top: 55px; width: 40px; align-items: center; left: 5px; height: 677px; justify-content: space-around; }
+        .axis-label { font-size: 12px; font-weight: bold; color: #525a6c; text-align: center; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
 
         /* Landmark Aesthetics */
         .cell.node-minor { border: 1px dashed #ffb300; background: #24211a; }
@@ -111,4 +113,3 @@
             <button class="action-button" id="btn-widen" onclick="setIntent('widen')"><span>💠 Expand Matrix</span><small>1 AP</small></button>
             <button class="action-button" id="btn-wall" onclick="setIntent('wall')"><span>🧱 Build Wall</span><small>1 AP</small></button>
             <button class="action-button" id="btn-turret" onclick="setIntent('turret')"><span>🎯 Place Turret</span><small>3 AP</small></button>
-            <button class="action-button" id="btn-generator" onclick="setIntent('generator')"><span>⚡ Place Gen</span><small>5 AP</small></button>
