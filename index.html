@@ -3,128 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>15x15 Tactical Arena Grid Game</title>
+    <title>Square-Buster: Tactical 15x15 Arena</title>
     <style>
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { margin: 0; padding: 20px; background-color: #1a1a1a; color: #ffffff; display: flex; justify-content: center; }
-        .game-container { display: flex; gap: 20px; max-width: 1200px; width: 100%; background: #2a2a2a; padding: 20px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-        .left-panel { flex: 1.3; display: flex; flex-direction: column; align-items: center; }
-        .right-panel { flex: 0.7; display: flex; flex-direction: column; gap: 15px; border-left: 2px solid #3a3a3a; padding-left: 20px; }
-        h1 { margin-top: 0; font-size: 24px; color: #4caf50; text-align: center; width: 100%; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+        body { margin: 0; padding: 20px; background-color: #1a1a1a; color: #ffffff; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+        .game-container { display: flex; gap: 30px; max-width: 1250px; width: 100%; background: #262626; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #333; }
         
-        /* Grid Layout */
-        .grid-wrapper { position: relative; padding: 25px; background: #222; border-radius: 8px; border: 1px solid #444; }
-        .grid-container { display: grid; grid-template-columns: repeat(15, 35px); grid-template-rows: repeat(15, 35px); gap: 2px; }
-        .cell { background: #333; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; position: relative; cursor: pointer; user-select: none; transition: background 0.15s; border: 1px solid rgba(255,255,255,0.03); }
-        .cell:hover { filter: brightness(1.2); }
+        /* Left Side: Massive Gameplay Grid */
+        .left-panel { flex: 1.4; display: flex; flex-direction: column; align-items: center; background: #1f1f1f; padding: 20px; border-radius: 10px; border: 1px solid #2e2e2e; }
+        h1 { margin: 0 0 20px 0; font-size: 28px; color: #4caf50; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; }
         
-        /* Labels */
-        .label-row { position: absolute; display: flex; left: 25px; height: 25px; align-items: center; }
-        .label-row.top { top: 0; width: 553px; justify-content: space-around; }
-        .label-col { position: absolute; display: flex; flex-direction: column; top: 25px; width: 25px; align-items: center; }
-        .label-col.left { left: 0; height: 553px; justify-content: space-around; }
-        .axis-label { font-size: 11px; font-weight: bold; color: #888; text-align: center; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
+        .grid-wrapper { position: relative; padding: 35px; background: #111; border-radius: 8px; border: 2px solid #333; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        .grid-container { display: grid; grid-template-columns: repeat(15, 45px); grid-template-rows: repeat(15, 45px); gap: 2px; }
+        
+        .cell { background: #2a2a2a; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; position: relative; cursor: pointer; user-select: none; transition: background 0.15s, transform 0.1s; border: 1px solid rgba(255,255,255,0.02); }
+        .cell:hover { filter: brightness(1.2); transform: scale(1.02); z-index: 2; }
+        
+        /* Coordinate Labels */
+        .label-row { position: absolute; display: flex; left: 35px; height: 35px; align-items: center; }
+        .label-row.top { top: 0; width: 703px; justify-content: space-around; }
+        .label-col { position: absolute; display: flex; flex-direction: column; top: 35px; width: 35px; align-items: center; }
+        .label-col.left { left: 0; height: 703px; justify-content: space-around; }
+        .axis-label { font-size: 13px; font-weight: bold; color: #777; text-align: center; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
 
-        /* Game Elements Styling */
-        .cell.in-range { background: rgba(76, 175, 80, 0.25); border: 1px solid #4caf50; }
-        .cell.node-minor { border: 2px dashed #ff9800; background: #443622; }
-        .cell.node-major { border: 2px dashed #e91e63; background: #442230; }
-        .cell.node-minor::after { content: "+1"; position: absolute; font-size: 9px; color: #ff9800; bottom: 1px; right: 2px; }
-        .cell.node-major::after { content: "+3"; position: absolute; font-size: 9px; color: #e91e63; bottom: 1px; right: 2px; }
+        /* Tactical Overlays & Mechanics Styles */
+        .cell.in-range { background: rgba(76, 175, 80, 0.25); border: 2px solid #4caf50; }
+        .cell.node-minor { border: 2px dashed #ff9800; background: #3d2b15; }
+        .cell.node-major { border: 2px dashed #e91e63; background: #401827; }
+        .cell.node-minor::after { content: "+1"; position: absolute; font-size: 10px; color: #ff9800; bottom: 2px; right: 4px; font-weight: 800; }
+        .cell.node-major::after { content: "+3"; position: absolute; font-size: 11px; color: #e91e63; bottom: 2px; right: 4px; font-weight: 800; }
         
-        .p1-color { background-color: #2196f3 !important; color: white; }
-        .p2-color { background-color: #4caf50 !important; color: white; }
-        .p3-color { background-color: #ff9800 !important; color: white; }
-        .p4-color { background-color: #9c27b0 !important; color: white; }
+        /* Players Distinct Assets */
+        .p1-color { background-color: #2196f3 !important; color: #ffffff; box-shadow: 0 0 10px #2196f3; }
+        .p2-color { background-color: #4caf50 !important; color: #ffffff; box-shadow: 0 0 10px #4caf50; }
+        .p3-color { background-color: #ff9800 !important; color: #ffffff; box-shadow: 0 0 10px #ff9800; }
+        .p4-color { background-color: #9c27b0 !important; color: #ffffff; box-shadow: 0 0 10px #9c27b0; }
         
-        .structure { font-size: 16px; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .wall-struct { background: #555; border: 2px solid #777; border-radius: 4px; color: #bbb; }
-        .gen-struct { border: 2px solid currentColor; border-radius: 50%; font-size: 12px; font-weight: bold; background: rgba(0,0,0,0.4); }
-        .turret-struct { border: 2px solid currentColor; font-size: 14px; font-weight: bold; background: rgba(0,0,0,0.4); clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
+        /* Built Unit Inlays */
+        .structure { font-size: 20px; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .wall-struct { background: #4a4a4a; border: 2px solid #666; border-radius: 4px; color: #bbb; }
+        .gen-struct { border: 2px solid currentColor; border-radius: 50%; font-size: 15px; font-weight: bold; background: rgba(0,0,0,0.5); }
+        .turret-struct { border: 2px solid currentColor; font-size: 16px; font-weight: bold; background: rgba(0,0,0,0.5); clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
 
-        /* Dashboard Controls */
-        .player-status-card { background: #333; padding: 12px; border-radius: 8px; border-left: 5px solid #fff; display: flex; flex-direction: column; gap: 4px; }
-        .player-status-card.active { box-shadow: 0 0 12px rgba(255,255,255,0.2); background: #3d3d3d; }
-        .status-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 15px; }
-        .status-stats { display: flex; gap: 15px; font-size: 13px; color: #ccc; }
-        .status-stats span b { color: #fff; }
+        /* Right Side: Command Dashboard Panels */
+        .right-panel { flex: 0.8; display: flex; flex-direction: column; gap: 15px; background: #1e1e1e; padding: 20px; border-radius: 10px; border: 1px solid #2e2e2e; align-self: stretch; }
         
-        .actions-panel { background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
-        .panel-title { font-size: 14px; font-weight: bold; color: #aaa; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .player-status-card { background: #2a2a2a; padding: 14px; border-radius: 8px; border-left: 6px solid #fff; display: flex; flex-direction: column; gap: 6px; border: 1px solid #3a3a3a; border-left-width: 6px; transition: transform 0.2s; }
+        .player-status-card.active { transform: scale(1.02); background: #333; border-color: #555; box-shadow: 0 4px 15px rgba(255,255,255,0.05); }
+        .status-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 16px; letter-spacing: 0.5px; }
+        .status-tag { font-size: 11px; background: #ff3333; padding: 2px 6px; border-radius: 4px; font-weight: bold; letter-spacing: 1px; }
+        .status-stats { display: flex; gap: 20px; font-size: 14px; color: #b3b3b3; }
+        .status-stats span b { color: #ffffff; }
         
-        .action-btn { background: #444; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; text-align: left; display: flex; justify-content: space-between; align-items: center; font-size: 13px; transition: background 0.2s; width: 100%; }
-        .action-btn:hover:not(:disabled) { background: #555; }
-        .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .action-btn.active-choice { background: #4caf50 !important; box-shadow: 0 0 8px rgba(76,175,80,0.4); }
+        .actions-panel { background: #161616; padding: 18px; border-radius: 8px; border: 1px solid #2d2d2d; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
+        .panel-title { font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
         
-        .skip-btn { background: #d32f2f; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; text-align: center; text-transform: uppercase; width: 100%; transition: background 0.2s; margin-top: auto; }
-        .skip-btn:hover { background: #f44336; }
+        .action-btn { background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; text-align: left; display: flex; justify-content: space-between; align-items: center; font-size: 14px; transition: all 0.15s; width: 100%; }
+        .action-btn:hover:not(:disabled) { background: #353535; border-color: #444; }
+        .action-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+        .action-btn.active-choice { background: #4caf50 !important; color: white !important; border-color: #66bb6a !important; box-shadow: 0 0 10px rgba(76,175,80,0.3); }
         
-        .log-box { background: #151515; border-radius: 6px; padding: 8px; font-size: 12px; color: #aaa; height: 80px; overflow-y: auto; border: 1px solid #333; font-family: monospace; }
-        .victory-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; z-index: 10; font-size: 24px; font-weight: bold; color: #4caf50; }
+        .skip-btn { background: #c62828; color: white; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; text-align: center; text-transform: uppercase; width: 100%; transition: background 0.2s; margin-top: auto; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .skip-btn:hover { background: #e53935; }
+        
+        .log-box { background: #0c0c0c; border-radius: 6px; padding: 10px; font-size: 13px; color: #8ed191; height: 100px; overflow-y: auto; border: 1px solid #222; font-family: 'Courier New', Courier, monospace; line-height: 1.4; }
+        .victory-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; z-index: 10; font-size: 32px; font-weight: bold; color: #4caf50; text-shadow: 0 0 10px rgba(76,175,80,0.5); }
     </style>
 </head>
 <body>
 
 <div class="game-container">
-    <!-- Left Hand: Enlarged Gameplay Arena -->
+    <!-- Left Column: Big Tabletop Grid Board -->
     <div class="left-panel">
-        <h1>TACTICAL ARENA 15x15</h1>
+        <h1>Square-Buster</h1>
         <div class="grid-wrapper">
-            <!-- Labels top -->
             <div class="label-row top" id="top-labels"></div>
-            <!-- Labels left -->
             <div class="label-col left" id="left-labels"></div>
-            <!-- Grid Container -->
             <div class="grid-container" id="board"></div>
-            <!-- Victory Overlay -->
+            
             <div class="victory-screen" id="victory-layer" style="display: none;">
-                <div id="victory-text">PLAYER 1 WINS!</div>
-                <button onclick="resetGame()" style="margin-top:15px; padding:8px 16px; font-weight:bold; cursor:pointer;">Play Again</button>
+                <div id="victory-text">PLAYER 1 SECURED VICTORY!</div>
+                <button onclick="resetGame()" style="margin-top:20px; padding:12px 24px; font-size:16px; font-weight:bold; cursor:pointer; background:#4caf50; color:white; border:none; border-radius:6px;">Start New Match</button>
             </div>
         </div>
     </div>
 
-    <!-- Right Hand: Consolidated Sidebar Dashboard -->
+    <!-- Right Column: Command HUD Sidebar -->
     <div class="right-panel">
-        <!-- Status Display cards -->
         <div id="p1-card" class="player-status-card" style="border-left-color: #2196f3;">
-            <div class="status-header"><span>Player 1</span><span id="p1-status-tag"></span></div>
+            <div class="status-header"><span>Player 1</span><span id="p1-status-tag" class="status-tag" style="display:none;">ELIMINATED</span></div>
             <div class="status-stats"><span>Lives: <b id="p1-lives">3</b></span><span>AP: <b id="p1-ap">1</b></span><span>Range: <b id="p1-rng">1</b></span></div>
         </div>
         <div id="p2-card" class="player-status-card" style="border-left-color: #4caf50;">
-            <div class="status-header"><span>Player 2</span><span id="p2-status-tag"></span></div>
+            <div class="status-header"><span>Player 2</span><span id="p2-status-tag" class="status-tag" style="display:none;">ELIMINATED</span></div>
             <div class="status-stats"><span>Lives: <b id="p2-lives">3</b></span><span>AP: <b id="p2-ap">1</b></span><span>Range: <b id="p2-rng">1</b></span></div>
         </div>
         <div id="p3-card" class="player-status-card" style="border-left-color: #ff9800;">
-            <div class="status-header"><span>Player 3</span><span id="p3-status-tag"></span></div>
+            <div class="status-header"><span>Player 3</span><span id="p3-status-tag" class="status-tag" style="display:none;">ELIMINATED</span></div>
             <div class="status-stats"><span>Lives: <b id="p3-lives">3</b></span><span>AP: <b id="p3-ap">1</b></span><span>Range: <b id="p3-rng">1</b></span></div>
         </div>
         <div id="p4-card" class="player-status-card" style="border-left-color: #9c27b0;">
-            <div class="status-header"><span>Player 4</span><span id="p4-status-tag"></span></div>
+            <div class="status-header"><span>Player 4</span><span id="p4-status-tag" class="status-tag" style="display:none;">ELIMINATED</span></div>
             <div class="status-stats"><span>Lives: <b id="p4-lives">3</b></span><span>AP: <b id="p4-ap">1</b></span><span>Range: <b id="p4-rng">1</b></span></div>
         </div>
 
-        <!-- Action Choices Configuration Dashboard -->
         <div class="actions-panel">
-            <div class="panel-title">Available Operations</div>
-            <button class="action-btn" id="btn-move" onclick="selectAction('move')"><span>🏃 Move Position</span><small>Cost: 1 AP / Step</small></button>
-            <button class="action-btn" id="btn-attack" onclick="selectAction('attack')"><span>⚔️ Attack / Strike Target</span><small>Cost: 1 AP</small></button>
-            <button class="action-btn" id="btn-expand" onclick="selectAction('expand')"><span>📐 Expand Diamond Range</span><small>Cost: 1 AP (Max 3)</small></button>
-            <button class="action-btn" id="btn-wall" onclick="selectAction('wall')"><span>🧱 Build Barrier Wall</span><small>Cost: 1 AP</small></button>
-            <button class="action-btn" id="btn-gen" onclick="selectAction('generator')"><span>⚡ Build AP Generator</span><small>Cost: 5 AP</small></button>
-            <button class="action-btn" id="btn-turret" onclick="selectAction('turret')"><span>🛡️ Build Defense Turret</span><small>Cost: 5 AP</small></button>
-            <button class="action-btn" id="btn-gift" onclick="selectAction('gift')"><span>🎁 Gift AP to Neighbor</span><small>Cost: 1 AP</small></button>
-            
-            <div class="panel-title" style="margin-top:5px;">Battle Log</div>
-            <div class="log-box" id="log">Game initiated. Match started!</div>
-
-            <button class="skip-btn" id="btn-skip" onclick="skipTurn()">Skip / Accumulate AP</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    const COLS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'];
-    
-    // Core Immutable State Objects
+            <div class="panel-title">Operations Menu</div>
+            <button class="action-btn" id="btn-move" onclick="selectAction('move')"><span>🏃 Move Character</span><small>1 AP / step</small></button>
