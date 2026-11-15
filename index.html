@@ -14,7 +14,7 @@
         .left-panel { flex: 1.5; display: flex; flex-direction: column; align-items: center; background: #1a1d24; padding: 20px; border-radius: 10px; border: 1px solid #252932; }
         h1 { margin: 0 0 20px 0; font-size: 24px; color: #4caf50; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
         
-        .grid-wrapper { position: relative; padding: 40px; background: #11141a; border-radius: 8px; border: 1px solid #2a2f3a; }
+        .grid-wrapper { position: relative; width: 770px; height: 780px; padding: 40px; background: #11141a; border-radius: 8px; border: 1px solid #2a2f3a; display: flex; align-items: center; justify-content: center; }
         .grid-container { display: grid; grid-template-columns: repeat(15, 45px); grid-template-rows: repeat(15, 45px); gap: 1px; background: #222731; border: 1px solid #222731; width: 689px; height: 689px; }
         
         .cell { background: #161920; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; position: relative; cursor: pointer; user-select: none; transition: background 0.15s; width: 45px; height: 45px; }
@@ -29,7 +29,6 @@
         .cell.node-minor { border: 1px solid #ffb300; background: #24211a; }
         .cell.node-major { border: 1px solid #ffb300; background: #2d2417; }
         .node-content { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; color: #ffb300; gap: 2px; }
-        .node-content span { font-size: 11px; }
 
         /* Diamond Range Overlay Indicators */
         .cell.movement-range { background: rgba(33, 150, 243, 0.18) !important; border: 2px solid #2196f3 !important; }
@@ -55,7 +54,7 @@
         .status-stats { display: flex; gap: 15px; font-size: 13px; color: #a0aabf; }
         .status-stats b { color: #fff; }
         
-        .operations-box { background: #11141a; padding: 15px; border-radius: 8px; border: 1px solid #222731; display: flex; flex-direction: column; gap: 10px; }
+        .operations-box { background: #11141a; padding: 15px; border-radius: 8px; border: 1px solid #222731; display: flex; flex-direction: column; gap: 10px; height: 100%; }
         .panel-heading { font-size: 11px; font-weight: bold; color: #626e82; text-transform: uppercase; letter-spacing: 1px; }
         .action-button { background: #222731; color: #fff; border: 1px solid #2e3542; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center; font-size: 13px; transition: all 0.15s; width: 100%; text-align: left; }
         .action-button:hover:not(:disabled) { background: #2c3340; border-color: #3e485c; }
@@ -88,19 +87,19 @@
     </div>
 
     <div class="right-panel">
-        <div id="p1-card" class="player-status-card" style="border-left-color: #2196f3;">
+        <div id="p1-card" class="player-status-card">
             <div class="status-header"><span>Player 1</span><span id="p1-tag" class="status-tag" style="display:none;">ELIMINATED</span></div>
             <div class="status-stats"><span>HP: <b id="p1-lives">3</b>/10</span><span>AP: <b id="p1-ap">1</b></span><span>Range: <b id="p1-rng">1</b></span></div>
         </div>
-        <div id="p2-card" class="player-status-card" style="border-left-color: #ffb300;">
+        <div id="p2-card" class="player-status-card">
             <div class="status-header"><span>Player 2</span><span id="p2-tag" class="status-tag" style="display:none;">ELIMINATED</span></div>
             <div class="status-stats"><span>HP: <b id="p2-lives">3</b>/10</span><span>AP: <b id="p2-ap">1</b></span><span>Range: <b id="p2-rng">1</b></span></div>
         </div>
-        <div id="p3-card" class="player-status-card" style="border-left-color: #f44336;">
+        <div id="p3-card" class="player-status-card">
             <div class="status-header"><span>Player 3</span><span id="p3-tag" class="status-tag" style="display:none;">ELIMINATED</span></div>
             <div class="status-stats"><span>HP: <b id="p3-lives">3</b>/10</span><span>AP: <b id="p3-ap">1</b></span><span>Range: <b id="p3-rng">1</b></span></div>
         </div>
-        <div id="p4-card" class="player-status-card" style="border-left-color: #4caf50;">
+        <div id="p4-card" class="player-status-card">
             <div class="status-header"><span>Player 4</span><span id="p4-tag" class="status-tag" style="display:none;">ELIMINATED</span></div>
             <div class="status-stats"><span>HP: <b id="p4-lives">3</b>/10</span><span>AP: <b id="p4-ap">1</b></span><span>Range: <b id="p4-rng">1</b></span></div>
         </div>
