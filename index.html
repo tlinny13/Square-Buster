@@ -14,11 +14,11 @@
         .left-panel { flex: 1.5; display: flex; flex-direction: column; align-items: center; background: #1a1d24; padding: 20px; border-radius: 10px; border: 1px solid #252932; }
         h1 { margin: 0 0 20px 0; font-size: 24px; color: #4caf50; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
         
-        .grid-wrapper { position: relative; padding: 40px; background: #11141a; border-radius: 8px; border: 1px solid #2a2f3a; }
-        .grid-container { display: grid; grid-template-columns: repeat(15, 45px); grid-template-rows: repeat(15, 45px); gap: 1px; background: #222731; border: 1px solid #222731; width: 689px; height: 689px; }
+        /* LOCKED CONTAINER: Forced width and height to prevent parent container collapse */
+        .grid-wrapper { position: relative; min-width: 770px; min-height: 770px; padding: 40px; background: #11141a; border-radius: 8px; border: 1px solid #2a2f3a; display: block; clear: both; }
+        .grid-container { display: grid; grid-template-columns: repeat(15, 45px); grid-template-rows: repeat(15, 45px); gap: 1px; background: #222731; border: 1px solid #222731; width: 689px; height: 689px; clear: both; }
         
-        /* FIXED: Re-added physical grid square properties so the board structure is visible */
-        .cell { background: #161920; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; position: relative; cursor: pointer; user-select: none; transition: background 0.15s; width: 45px; height: 45px; border: 1px solid #252932; }
+        .cell { background: #161920; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; position: relative; cursor: pointer; user-select: none; transition: background 0.15s; width: 45px; height: 45px; }
         .cell:hover { background: #1c212b; z-index: 2; }
         
         /* Edge Axis Labels */
@@ -27,17 +27,16 @@
         .axis-label { font-size: 12px; font-weight: bold; color: #525a6c; text-align: center; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
 
         /* Landmark Aesthetics */
-        .cell.node-minor { border: 2px solid #ffb300 !important; background: #24211a !important; color: #ffb300; }
-        .cell.node-major { border: 2px solid #ffb300 !important; background: #2d2417 !important; color: #ffb300; }
-        
+        .cell.node-minor { border: 1px solid #ffb300; background: #24211a; }
+        .cell.node-major { border: 1px solid #ffb300; background: #2d2417; }
+        .node-content { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; color: #ffb300; gap: 2px; }
+
         /* Diamond Range Overlay Indicators */
-        .cell.movement-range { background: rgba(33, 150, 243, 0.25) !important; border: 2px solid #2196f3 !important; }
-        .cell.interaction-range { background: rgba(76, 175, 80, 0.25) !important; border: 2px dashed #4caf50 !important; }
+        .cell.movement-range { background: rgba(33, 150, 243, 0.18) !important; border: 2px solid #2196f3 !important; }
+        .cell.interaction-range { background: rgba(76, 175, 80, 0.18) !important; border: 2px dashed #4caf50 !important; }
         
         /* Player Tokens */
         .player-token { width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.4); z-index: 3; }
-        
-        /* FIXED: Re-added the missing player background visual colors to remove transparency */
         .p1-color { background-color: #2196f3 !important; }
         .p2-color { background-color: #ffb300 !important; }
         .p3-color { background-color: #f44336 !important; }
@@ -56,7 +55,7 @@
         .status-stats { display: flex; gap: 15px; font-size: 13px; color: #a0aabf; }
         .status-stats b { color: #fff; }
         
-        .operations-box { background: #11141a; padding: 15px; border-radius: 8px; border: 1px solid #222731; display: flex; flex-direction: column; gap: 10px; }
+        .operations-box { background: #11141a; padding: 15px; border-radius: 8px; border: 1px solid #222731; display: flex; flex-direction: column; gap: 10px; height: 100%; }
         .panel-heading { font-size: 11px; font-weight: bold; color: #626e82; text-transform: uppercase; letter-spacing: 1px; }
         .action-button { background: #222731; color: #fff; border: 1px solid #2e3542; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center; font-size: 13px; transition: all 0.15s; width: 100%; text-align: left; }
         .action-button:hover:not(:disabled) { background: #2c3340; border-color: #3e485c; }
